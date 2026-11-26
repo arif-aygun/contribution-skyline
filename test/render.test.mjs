@@ -29,10 +29,10 @@ test('no token: exits 1 before any network call', async () => {
   assert.equal(h.writes.length, 0);
 });
 
-test('GITHUB_TOKEN only: warns that private contributions are missing', async () => {
+test('GITHUB_TOKEN only: notes that private days need the profile setting', async () => {
   const h = harness({ env: { GITHUB_TOKEN: 't' } });
   assert.equal(await main(h.deps), 0);
-  assert.ok(h.logs.some((l) => /private contributions/i.test(l)));
+  assert.ok(h.logs.some((l) => l.includes('"Private contributions" profile setting')));
 });
 
 test('SKYLINE_TOKEN: writes dist/skyline.svg and logs totals', async () => {

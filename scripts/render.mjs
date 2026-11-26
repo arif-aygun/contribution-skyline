@@ -13,7 +13,9 @@ async function loadCalendar({ env, argv, fetchImpl, readFile: read, log }) {
   if (fixtureAt !== -1) return parseCalendar(JSON.parse(await read(argv[fixtureAt + 1], 'utf8')));
   const token = env.SKYLINE_TOKEN || env.GITHUB_TOKEN;
   if (!token) throw new Error('No token: set SKYLINE_TOKEN (read:user PAT)');
-  if (!env.SKYLINE_TOKEN) log('warning: SKYLINE_TOKEN not set, using GITHUB_TOKEN; private contributions will be missing');
+  if (!env.SKYLINE_TOKEN) {
+    log('note: using GITHUB_TOKEN; private days are counted only if the "Private contributions" profile setting is on');
+  }
   return fetchCalendar({ user: env.SKYLINE_USER || DEFAULT_USER, token, fetchImpl });
 }
 
