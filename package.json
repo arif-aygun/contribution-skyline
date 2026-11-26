@@ -1,0 +1,14 @@
+{
+  "name": "contribution-skyline",
+  "version": "1.0.0",
+  "description": "A pixel-art night city built from the last year of GitHub contributions.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "test": "node --test --experimental-test-coverage --test-coverage-lines=80 \"test/*.test.mjs\"",
+    "render": "node scripts/render.mjs",
+    "preview": "node scripts/preview.mjs"
+  }
+}
