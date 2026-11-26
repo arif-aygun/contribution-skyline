@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  actions: write # keepalive: re-enable this workflow
 
 concurrency:
   group: skyline
@@ -44,3 +45,11 @@ jobs:
           git add skyline.svg
           git commit -q -m "Skyline at $(date -u +'%Y-%m-%d %H:%M') UTC"
           git push -q -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" output
+
+      # GitHub disables scheduled workflows in public repos after 60 days without repo activity.
+      # Re-enabling via the API resets that timer without adding commits to main.
+      - name: Keep the schedule alive
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow enable skyline.yml --repo "${GITHUB_REPOSITORY}"
