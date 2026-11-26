@@ -65,3 +65,20 @@ test('fetchCalendar throws with the HTTP status on 401', async () => {
   const fetchImpl = async () => ({ ok: false, status: 401, json: async () => ({}) });
   await assert.rejects(fetchCalendar({ user: 'octo', token: 'x', fetchImpl }), /401/);
 });
+
+test('throws on an empty calendar', () => {
+  const json = valid();
+  json.data.user.contributionsCollection.contributionCalendar.weeks = [];
+  assert.throws(() => parseCalendar(json), /empty/i);
+});
+
+test('returns the restricted (private) contribution count', () => {
+  const json = valid();
+  json.data.user.contributionsCollection.restrictedContributionsCount = 7;
+  assert.equal(parseCalendar(json).restricted, 7);
+});
+
+test('the query asks for the restricted count', async () => {
+  const { QUERY } = await import('../src/fetch.js');
+  assert.match(QUERY, /restrictedContributionsCount/);
+});

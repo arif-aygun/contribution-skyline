@@ -15,6 +15,6 @@ export function makeCalendarJson({ start, days, count = () => 0 }) {
     weeks.at(-1).contributionDays.push({ date: d.toISOString().slice(0, 10), contributionCount: c, weekday });
   }
   return {
-    data: { user: { contributionsCollection: { contributionCalendar: { totalContributions: total, weeks } } } },
+    data: { user: { contributionsCollection: { contributionCalendar: { totalContributions: total, weeks }, restrictedContributionsCount: 0 } } },
   };
 }

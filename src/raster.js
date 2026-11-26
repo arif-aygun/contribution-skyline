@@ -23,6 +23,12 @@ function paint(ops, width, height) {
  * One path per color, drawn as 1px-wide strokes on half-pixel rows (`stroke-width` 1, butt caps):
  * `M{x} {y}.5h{n}` for the first run, then `m{dx} {dy}h{n}` relative to the pen.
  */
+/** Final static color at a pixel (or undefined), after all non-animated ops are painted. */
+export function paintedColors(ops, width, height) {
+  const { colors, grid } = paint(ops, width, height);
+  return (x, y) => (x < 0 || y < 0 || x >= width || y >= height ? undefined : colors[grid[y * width + x] - 1]);
+}
+
 export function rasterize(ops, width, height) {
   const { colors, grid } = paint(ops, width, height);
   const pens = colors.map(() => ({ d: '', x: 0, y: 0 }));

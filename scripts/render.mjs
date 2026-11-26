@@ -24,7 +24,7 @@ export async function main(deps) {
     const svg = renderSkyline(calendar, { user: env.SKYLINE_USER || DEFAULT_USER });
     await mk('dist', { recursive: true });
     await write(OUT, svg);
-    log(`total=${calendar.total} days=${calendar.days.length} bytes=${Buffer.byteLength(svg)}`);
+    log(`total=${calendar.total} restricted=${calendar.restricted} days=${calendar.days.length} bytes=${Buffer.byteLength(svg)}`);
     return 0;
   } catch (err) {
     log(`error: ${err.message}`);

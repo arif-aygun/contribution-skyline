@@ -40,7 +40,7 @@ test('SKYLINE_TOKEN: writes dist/skyline.svg and logs totals', async () => {
   assert.equal(await main(h.deps), 0);
   assert.equal(h.writes[0].path, 'dist/skyline.svg');
   assert.match(h.writes[0].data, /^<svg/);
-  assert.ok(h.logs.some((l) => /total=\d+ days=30 bytes=\d+/.test(l)));
+  assert.ok(h.logs.some((l) => /total=\d+ restricted=\d+ days=30 bytes=\d+/.test(l)));
 });
 
 test('--fixture renders without a token or network', async () => {

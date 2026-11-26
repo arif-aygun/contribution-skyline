@@ -6,6 +6,7 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 export const QUERY = `query($login: String!) {
   user(login: $login) {
     contributionsCollection {
+      restrictedContributionsCount
       contributionCalendar {
         totalContributions
         weeks { contributionDays { date contributionCount weekday } }
@@ -36,8 +37,10 @@ export function parseCalendar(json) {
     if (!Array.isArray(w?.contributionDays)) throw new Error('Unexpected response: week without days');
     return w.contributionDays.map(parseDay);
   });
+  if (days.length === 0) throw new Error('Unexpected response: calendar is empty');
   const total = days.reduce((sum, d) => sum + d.count, 0);
-  return { total, days };
+  const restricted = user.contributionsCollection.restrictedContributionsCount;
+  return { total, restricted: Number.isInteger(restricted) ? restricted : 0, days };
 }
 
 export async function fetchCalendar({ user, token, fetchImpl = fetch }) {

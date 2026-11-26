@@ -47,3 +47,46 @@ test('16 windows flicker when enough are lit', () => {
   const svg = renderSkyline(mixed, { user: 'octo' });
   assert.equal((svg.match(/class="flicker"/g) ?? []).length, 16);
 });
+
+/** Decodes the stroke paths of an SVG into a Map "x,y" → color. */
+function staticPixels(svg) {
+  const px = new Map();
+  for (const [, color, d] of svg.matchAll(/<path stroke="([^"]+)" d="([^"]+)"\/>/g)) {
+    let x = 0, y = 0;
+    for (const [, cmd, a, b] of d.matchAll(/([Mmh])(-?[\d.]+)(?: (-?[\d.]+))?/g)) {
+      if (cmd === 'M') { x = Number(a); y = Number(b) - 0.5; }
+      else if (cmd === 'm') { x += Number(a); y += Number(b); }
+      else { for (let i = 0; i < Number(a); i++) px.set(`${x + i},${y}`, color); x += Number(a); }
+    }
+  }
+  return px;
+}
+
+const animated = (svg) => [...svg.matchAll(/<rect x="(\d+)" y="(\d+)"[^>]*fill="([^"]+)" class="(\w+)"/g)]
+  .map(([, x, y, fill, cls]) => ({ x: Number(x), y: Number(y), fill, cls }));
+
+test('flicker windows sit on visible lit windows and turn them off', () => {
+  const svg = renderSkyline(mixed, { user: 'octo' });
+  const px = staticPixels(svg);
+  const flick = animated(svg).filter((a) => a.cls === 'flicker');
+  assert.ok(flick.length > 0);
+  for (const a of flick) {
+    assert.equal(px.get(`${a.x},${a.y}`), PALETTE.windowLit, `flicker at ${a.x},${a.y}`);
+    assert.equal(a.fill, PALETTE.windowOff);
+  }
+});
+
+test('blinking lights and twinkling stars only sit on open sky', () => {
+  for (const cal of [mixed, year(() => 83)]) {
+    const svg = renderSkyline(cal, { user: 'octo' });
+    const px = staticPixels(svg);
+    for (const a of animated(svg).filter((r) => r.cls !== 'flicker')) {
+      assert.ok(PALETTE.sky.includes(px.get(`${a.x},${a.y}`)), `${a.cls} at ${a.x},${a.y} over ${px.get(`${a.x},${a.y}`)}`);
+    }
+  }
+});
+
+test('flicker overlay is hidden unless animated, so reduced motion shows lit windows', () => {
+  const svg = renderSkyline(mixed, { user: 'octo' });
+  assert.match(svg, /\.flicker \{ opacity: 0 \}[\s\S]*@media \(prefers-reduced-motion: no-preference\)/);
+});
