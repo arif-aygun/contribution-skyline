@@ -2,11 +2,14 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { rasterize, animatedRects } from '../src/raster.js';
 
-/** Parses run-length path data `M{x} {y}h{n}v1h-{n}z` back into a Set of "x,y". */
+/** Interprets stroke path data (M/m moves, h runs on half-pixel rows) back into a Set of "x,y". */
 function pixelsOf(d) {
   const set = new Set();
-  for (const [, x, y, n] of d.matchAll(/M(\d+) (\d+)h(\d+)v1h-\d+z/g)) {
-    for (let i = 0; i < Number(n); i++) set.add(`${Number(x) + i},${y}`);
+  let x = 0, y = 0;
+  for (const [, cmd, a, b] of d.matchAll(/([Mmh])(-?[\d.]+)(?: (-?[\d.]+))?/g)) {
+    if (cmd === 'M') { x = Number(a); y = Number(b); }
+    else if (cmd === 'm') { x += Number(a); y += Number(b); }
+    else { for (let i = 0; i < Number(a); i++) set.add(`${x + i},${y - 0.5}`); x += Number(a); }
   }
   return set;
 }
@@ -29,7 +32,7 @@ test('ops outside the canvas are clipped', () => {
   const paths = rasterize([{ x: -2, y: -1, w: 4, h: 3, color: '#ccc' }], 5, 5);
   const px = pixelsOf(paths.get('#ccc'));
   assert.deepEqual([...px].sort(), ['0,0', '0,1', '1,0', '1,1']);
-  assert.ok(!paths.get('#ccc').includes('-1 ') && !/M-/.test(paths.get('#ccc')));
+  assert.doesNotMatch(paths.get('#ccc'), /^M-/);
 });
 
 test('ops with a class are left out of paths and emitted as rects', () => {

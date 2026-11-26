@@ -1,4 +1,4 @@
-// Pixel ops → one SVG path per color (horizontal runs), plus individual rects for animated ops.
+// Pixel ops → one SVG stroke path per color (horizontal runs), plus individual rects for animated ops.
 
 /** Paints ops in order onto a local index grid; later ops overwrite earlier ones. */
 function paint(ops, width, height) {
@@ -19,20 +19,28 @@ function paint(ops, width, height) {
   return { colors, grid };
 }
 
+/**
+ * One path per color, drawn as 1px-wide strokes on half-pixel rows (`stroke-width` 1, butt caps):
+ * `M{x} {y}.5h{n}` for the first run, then `m{dx} {dy}h{n}` relative to the pen.
+ */
 export function rasterize(ops, width, height) {
   const { colors, grid } = paint(ops, width, height);
-  const parts = colors.map(() => []);
+  const pens = colors.map(() => ({ d: '', x: 0, y: 0 }));
   for (let y = 0; y < height; y++) {
     let x = 0;
     while (x < width) {
       const idx = grid[y * width + x];
       let end = x + 1;
       while (end < width && grid[y * width + end] === idx) end++;
-      if (idx !== 0) parts[idx - 1].push(`M${x} ${y}h${end - x}v1h-${end - x}z`);
+      if (idx !== 0) {
+        const pen = pens[idx - 1];
+        const move = pen.d === '' ? `M${x} ${y}.5` : `m${x - pen.x} ${y - pen.y}`;
+        pens[idx - 1] = { d: `${pen.d}${move}h${end - x}`, x: end, y };
+      }
       x = end;
     }
   }
-  return new Map(colors.map((c, i) => [c, parts[i].join('')]).filter(([, d]) => d.length > 0));
+  return new Map(colors.map((c, i) => [c, pens[i].d]).filter(([, d]) => d.length > 0));
 }
 
 const fmt = (n) => String(Math.round(n * 100) / 100);
