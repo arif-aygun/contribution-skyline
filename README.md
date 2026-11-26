@@ -40,13 +40,11 @@ A GitHub Action runs every 6 hours. It renders the SVG and force-pushes it to a 
 
 ## Use it for your own profile
 
-1. Fork this repo.
-2. Create a classic personal access token with the **`read:user`** scope. This is what lets private contributions count.
-3. Save it as the repo secret `SKYLINE_TOKEN`: `gh secret set SKYLINE_TOKEN`.
-4. Run the **Build the skyline** workflow once.
-5. Embed `https://raw.githubusercontent.com/<you>/contribution-skyline/output/skyline.svg` in your profile README.
+1. Fork this repo and enable Actions on the fork (forks start with workflows turned off).
+2. Run the **Build the skyline** workflow once.
+3. Embed `https://raw.githubusercontent.com/<you>/contribution-skyline/output/skyline.svg` in your profile README.
 
-Without `SKYLINE_TOKEN` the workflow falls back to `GITHUB_TOKEN`, which only sees public contributions.
+Private contributions count if **"Private contributions"** is turned on in your GitHub profile settings. The workflow's `GITHUB_TOKEN` then sees them, and no extra token is needed. If you'd rather keep that setting off, create a classic token with the `read:user` scope and save it as the repo secret `SKYLINE_TOKEN`.
 
 ## Run it locally
 

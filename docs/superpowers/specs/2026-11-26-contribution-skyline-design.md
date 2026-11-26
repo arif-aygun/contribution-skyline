@@ -55,7 +55,8 @@ Consequences, both decided:
 - The default `GITHUB_TOKEN` cannot see private contributions. A PAT with `read:user` scope is required, stored as repo secret `SKYLINE_TOKEN`. Verified: an authenticated `viewer`/`user` query returns the calendar with private contributions already folded in (834 total includes 404 restricted).
 - The calendar can contain 365–371 days, with partial first and last weeks.
 - The repo `arif-aygun/contribution-skyline` does not exist yet. It must be **public**, because the README embed uses `raw.githubusercontent.com`, as `gtu-window` (public) does. Creating and pushing it is an outward-facing step, so the user confirms it at that point. *(Builder's call recorded by Claude.)*
-- **Token setup:** the user creates a **classic PAT with the `read:user` scope** and saves it as the secret `SKYLINE_TOKEN`. The render step logs `totalContributions` and the restricted count, so a run that is missing private contributions is visible in the log. *(Claude's call.)*
+- **Update 2026-11-26:** the first CI run showed that `GITHUB_TOKEN` already returns private counts (restricted=404), because the profile's "Private contributions" setting is on. `SKYLINE_TOKEN` is optional.
+- **Token setup (original):** the user creates a **classic PAT with the `read:user` scope** and saves it as the secret `SKYLINE_TOKEN`. The render step logs `totalContributions` and the restricted count, so a run that is missing private contributions is visible in the log. *(Claude's call.)*
 - **"Today"** = the last day in the calendar the API returns. No timezone conversion is done. The API may bucket days in UTC, so for a few hours after local midnight the crane can sit on the previous local day. This is accepted. *(Claude's call.)*
 - Node 22, ESM, plus the user's global rules: small files (<400 lines), pure functions, no mutation, tests with ≥80% coverage.
 
